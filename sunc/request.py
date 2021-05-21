@@ -31,12 +31,13 @@ class Request:
     """
     Class responsible for making HTTP requests in pure python, without the need of external packages
     """
-    def __init__(self, headers={}):
+    def __init__(self, host, headers={}):
         # adds the User-Agent header by default, otherwise it will give us 403 Forbidden error.
         self.__headers = {
             'User-Agent': '%s/%s' % (APP_NAME, VERSION)
         }
         self.__headers.update(headers)
+        self.__host = host
 
     def __prepare_parameters(self, params):
         """
@@ -60,9 +61,10 @@ class Request:
             data = data.encode('ascii')
         return data
 
-    def __prepare_url(self, url, params):
+    def __prepare_url(self, path, params):            
         prepared_parameters = self.__prepare_parameters(params)
-        return '%s?%s' % (url, prepared_parameters) if prepared_parameters != '' else url
+        prepared_path = '%s?%s' % (path, prepared_parameters) if prepared_parameters != '' else path
+        return '%s%s' % (self.__host, prepared_path)
 
     def __prepare_headers(self, headers, is_json):
         """
@@ -81,13 +83,13 @@ class Request:
 
         return headers
 
-    def request(self, method, url, data={}, json={}, headers={}, params={}):
+    def request(self, method, path, data={}, json={}, headers={}, params={}):
         """
         Effectively makes the request to the desired url.
 
         Args:
             method (('GET', 'POST', 'PATCH')): Must be one of the following http methods
-            url (str): The url to fetch the resource from
+            path (str): The path of the url to fetch the resource from, the host is defined when you instantiate the class.
             data (dict, optional):  Dictionary, list of tuples, bytes, or file-like
                                     object to send in the body of request. Defaults to {}.
             json (dict, optional): JSON data to send in the body of the request. Defaults to {}.
@@ -103,7 +105,7 @@ class Request:
 
         prepared_data = self.__prepare_data(data, json)
         prepared_header = self.__prepare_headers(headers, is_json)
-        prepared_url = self.__prepare_url(url, params)
+        prepared_url = self.__prepare_url(path, params)
 
         request = urllib.request.Request(url=prepared_url, data=prepared_data, headers=prepared_header)
         request.get_method = lambda: method.upper()
@@ -119,11 +121,11 @@ class Request:
         
         return response
 
-    def get(self, url, params={}, **kwargs):
-        return self.request('GET',url, params=params, **kwargs)
+    def get(self, path, params={}, **kwargs):
+        return self.request('GET', path, params=params, **kwargs)
 
-    def post(self, url, data={}, json={}, **kwargs):
-        return self.request('POST', url, data=data, json=json, **kwargs)
+    def post(self, path, data={}, json={}, **kwargs):
+        return self.request('POST', path, data=data, json=json, **kwargs)
     
-    def patch(self, url, data={}, json={}, **kwargs):
-        return self.request('PATCH', url, data=data, json=json, **kwargs)
+    def patch(self, path, data={}, json={}, **kwargs):
+        return self.request('PATCH', path, data=data, json=json, **kwargs)
