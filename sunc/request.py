@@ -1,4 +1,5 @@
-from sunc.settings import (VERSION, APP_NAME)
+from sunc.settings import (VERSION, APP_NAME, VALID_REQUEST_METHODS)
+from sunc.errors import RequestMethodException
 
 import urllib.error
 import urllib.request
@@ -31,12 +32,22 @@ class Request:
     Class responsible for making HTTP requests in pure python, without the need of external packages
     """
     def __init__(self, headers={}):
+        # adds the User-Agent header by default, otherwise it will give us 403 Forbidden error.
         self.__headers = {
             'User-Agent': '%s/%s' % (APP_NAME, VERSION)
         }
         self.__headers.update(headers)
 
     def __prepare_parameters(self, params):
+        """
+        Encodes the url parameters if there are any
+        
+        Args:
+            params (dict[str, str]): A dict of string as keys where each key is the param name, and each value is the parameter value. This does not support nested parameters.
+
+        Returns:
+            str: returns the encoded url parameters.
+        """
         url_parameters = urllib.parse.urlencode(params)
         return url_parameters
 
@@ -71,6 +82,23 @@ class Request:
         return headers
 
     def request(self, method, url, data={}, json={}, headers={}, params={}):
+        """
+        Effectively makes the request to the desired url.
+
+        Args:
+            method (('GET', 'POST', 'PATCH')): Must be one of the following http methods
+            url (str): The url to fetch the resource from
+            data (dict, optional):  Dictionary, list of tuples, bytes, or file-like
+                                    object to send in the body of request. Defaults to {}.
+            json (dict, optional): JSON data to send in the body of the request. Defaults to {}.
+            headers (dict, optional): Dictionary of HTTP Headers to send with the request. Defaults to {}.
+            params (dict, optional):  Dictionary, list of tuples or bytes to send in the query string of the request. Defaults to {}.
+
+        Returns:
+            sunc.request.Response: A response object with handy functions to retrieve the data
+        """
+        if method.upper() not in VALID_REQUEST_METHODS:
+            raise RequestMethodException(method.upper())
         is_json = True if json else False
 
         prepared_data = self.__prepare_data(data, json)
