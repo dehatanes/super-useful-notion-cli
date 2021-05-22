@@ -17,10 +17,10 @@ No momento ela está configurada apenas para criar Atas automaticamente em uma t
 preferência.
 
 Este é um exemplo de database de atas no notion:
-![Tabela com o título "Atas de Chapter" no Notion](./doc_assets/notion_database_example.png)
+![Tabela com o título "Atas de Chapter" no Notion](https://github.com/dehatanes/super-useful-notion-cli/blob/main/doc_assets/notion_database_example.png)
 
 E este é um exemplo da `cli` rodando e criando uma nova ata (adicionando um novo item nessa tabela):
-![Video da cli funcionando](./doc_assets/working_cli_video.mov)
+![Video da cli funcionando](https://github.com/dehatanes/super-useful-notion-cli/blob/main/doc_assets/working_cli_video.gif)
 
 ## 2. Setup
 ####  First things first
